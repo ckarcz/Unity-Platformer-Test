@@ -166,7 +166,7 @@ public class PlayerMovement : MonoBehaviour
     {
         isTouchingGround = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
         isTouchingWall = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, wallLayer)
-                         || 
+                         ||
                          Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, groundLayer);
 
         isCrouching = inputVerticalValue < 0;
@@ -185,8 +185,6 @@ public class PlayerMovement : MonoBehaviour
         isWallGrabbing = allowWallGrabbing && !isTouchingGround && isTouchingWall && isFalling;
         isWallGrabbingLeft = isWallGrabbing && isFacingLeft;
         isWallGrabbingRight = isWallGrabbing && isFacingRight;
-
-        print($"{nameof(isTouchingGround)}: {isTouchingGround}, {nameof(isTouchingWall)}: {isTouchingWall}");
     }
 
     private void UpdateAnimation()
@@ -267,13 +265,8 @@ public class PlayerMovement : MonoBehaviour
             {
                 isJumpRunning = true;
             }
-            else
-            {
-                isJumpRunning = false;
-            }
 
             isFallRunning = false;
-            wasJumpRunning = false;
         }
 
         if (isFalling)
@@ -285,14 +278,11 @@ public class PlayerMovement : MonoBehaviour
             {
                 isFallRunning = isFallRunning || (mustJumpRunToFallRun ? wasJumpRunning : true);
             }
-            else
-            {
-                isFallRunning = false;
-            }
 
             isJumpRunning = false;
-            wasJumpRunning = false;
         }
+
+        wasJumpRunning = isJumpRunning;
     }
 
     private void FaceRight()
