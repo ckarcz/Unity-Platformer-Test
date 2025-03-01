@@ -183,6 +183,8 @@ public class PlayerMovement : MonoBehaviour
         isWallGrabbing = allowWallGrabbing && !isTouchingGround && isTouchingWall && isFalling;
         isWallGrabbingLeft = isWallGrabbing && isFacingLeft;
         isWallGrabbingRight = isWallGrabbing && isFacingRight;
+
+        print($"{nameof(isTouchingGround)}: {isTouchingGround}");
     }
 
     private void UpdateAnimation()
@@ -244,10 +246,22 @@ public class PlayerMovement : MonoBehaviour
         if (inputJumpPressed && (isTouchingGround || jumpsTaken < extraJumps))
         {
             isJumping = true;
+            isFalling = false;
             jumpAirTime = 0;
             jumpsTaken++;
+        }
 
-            if (inputRunHeldDown && allowJumpRunning)
+        if ((!inputJumpHeldDown && isJumping && jumpAirTime < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTime < maxJumpAirTime))
+        {
+            var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : jumpVelocity;
+            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, verticalVelocity);
+        }
+
+        if (isJumping)
+        {
+            jumpAirTime += Time.deltaTime;
+
+            if (inputJumpPressed && inputRunHeldDown && allowJumpRunning)
             {
                 isJumpRunning = true;
             }
@@ -258,12 +272,6 @@ public class PlayerMovement : MonoBehaviour
 
             isFallRunning = false;
             wasJumpRunning = false;
-        }
-
-        if ((!inputJumpHeldDown && isJumping && jumpAirTime < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTime < maxJumpAirTime))
-        {
-            var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : jumpVelocity;
-            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, verticalVelocity);
         }
 
         if (isFalling)
@@ -282,11 +290,6 @@ public class PlayerMovement : MonoBehaviour
 
             isJumpRunning = false;
             wasJumpRunning = false;
-        }
-
-        if (isJumping)
-        {
-            jumpAirTime += Time.deltaTime;
         }
     }
 
