@@ -15,6 +15,7 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("World")]
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask wallLayer;
 
     [Header("Movement")]
@@ -105,25 +106,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if (isJumping)
-        {
-            rigidBody.gravityScale = gravityJumping;
-        }
-        else if (isFalling)
-        {
-            if (isWallGrabbing)
-            {
-                rigidBody.gravityScale = gravityWallGrabbing;
-            }
-            else
-            {
-                rigidBody.gravityScale = gravityFalling;
-            }
-        }
-        else
-        {
-            rigidBody.gravityScale = gravityNormal;
-        }
+        UpdateGravity();
     }
 
     private void Update()
@@ -154,6 +137,29 @@ public class PlayerMovement : MonoBehaviour
 
         inputJumpPressed = Input.GetButtonDown("Jump");
         inputJumpHeldDown = Input.GetButton("Jump");
+    }
+
+    private void UpdateGravity()
+    {
+        if (isJumping)
+        {
+            rigidBody.gravityScale = gravityJumping;
+        }
+        else if (isFalling)
+        {
+            if (isWallGrabbing)
+            {
+                rigidBody.gravityScale = gravityWallGrabbing;
+            }
+            else
+            {
+                rigidBody.gravityScale = gravityFalling;
+            }
+        }
+        else
+        {
+            rigidBody.gravityScale = gravityNormal;
+        }
     }
 
     private void UpdateState()
@@ -190,13 +196,14 @@ public class PlayerMovement : MonoBehaviour
 
         animator.SetBool("Jumping", isJumping);
         animator.SetBool("Falling", isFalling);
+
         animator.SetBool("WallGrabbing", isWallGrabbing);
     }
 
     private void UpdateMovement()
     {
         UpdateMovementHorizontal();
-        UpdateMovementVertical1();
+        UpdateMovementVertical();
     }
 
     private void UpdateMovementHorizontal()
@@ -226,7 +233,7 @@ public class PlayerMovement : MonoBehaviour
         rigidBody.linearVelocity = new Vector2(horizontalVelovity * inputHorizontalValue, rigidBody.linearVelocity.y);
     }
 
-    private void UpdateMovementVertical1()
+    private void UpdateMovementVertical()
     {
         if (isTouchingGround)
         {
@@ -258,7 +265,7 @@ public class PlayerMovement : MonoBehaviour
             var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : jumpVelocity;
             rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, verticalVelocity);
         }
-        
+
         if (isFalling)
         {
             var verticalVelocity = isWallGrabbing ? maxWallGrabbingFallingVelocity : maxFallingVelocity;
