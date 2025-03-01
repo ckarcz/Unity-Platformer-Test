@@ -239,16 +239,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isTouchingGround)
         {
+            isJumping = false;
+            isFalling = false;
+
             jumpsTaken = 0;
-            jumpAirTime = 0;
         }
 
         if (inputJumpPressed && (isTouchingGround || jumpsTaken < extraJumps))
         {
             isJumping = true;
             isFalling = false;
-            jumpAirTime = 0;
+
             jumpsTaken++;
+            jumpAirTime = 0;
         }
 
         if ((!inputJumpHeldDown && isJumping && jumpAirTime < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTime < maxJumpAirTime))
