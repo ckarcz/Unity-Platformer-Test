@@ -21,6 +21,8 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     [SerializeField, Range(0, 20)] private float walkingVelocity = 5;
     [SerializeField, Range(0, 20)] private float runningVelocity = 10;
+    [SerializeField] private bool allowCrouchSliding = true;
+    [SerializeField, Range(0, 10)] private float minRunTimeForSlide = 1f;
     [SerializeField] private bool allowJumpRunning = true;
     [SerializeField] private bool allowFallRunning = true;
     [SerializeField] private bool mustJumpRunToFallRun = true;
@@ -73,6 +75,7 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool isWalking;
     [HideInInspector] public bool isRunning;
+    [HideInInspector] public float runTime;
     [HideInInspector] public bool isJumpRunning;
     [HideInInspector] public bool wasJumpRunning;
     [HideInInspector] public bool isFallRunning;
@@ -174,6 +177,7 @@ public class PlayerMovement : MonoBehaviour
         isMoving = Math.Abs(rigidBody.linearVelocityX) > 0.01f;
         isWalking = isMoving && Math.Abs(inputHorizontalValue) > 0.01f;
         isRunning = isWalking && inputRunHeldDown;
+        runTime = isRunning ? runTime + Time.deltaTime : 0;
 
         isJumping = rigidBody.linearVelocityY > 0.01f;
         isFalling = rigidBody.linearVelocityY < -0.01f;
@@ -226,6 +230,11 @@ public class PlayerMovement : MonoBehaviour
             {
                 MoveHorizontally();
             }
+        }
+
+        if (isCrouching && (!allowCrouchSliding || (runTime < minRunTimeForSlide)))
+        {
+            rigidBody.linearVelocity = new Vector2(0, rigidBody.linearVelocity.y);
         }
     }
 

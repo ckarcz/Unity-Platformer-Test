@@ -1061,6 +1061,8 @@ MonoBehaviour:
     m_Bits: 128
   walkingVelocity: 5
   runningVelocity: 10
+  allowCrouchSliding: 1
+  minRunTimeForSlide: 0.2
   allowJumpRunning: 1
   allowFallRunning: 1
   mustJumpRunToFallRun: 1
@@ -1084,6 +1086,7 @@ MonoBehaviour:
   isMoving: 0
   isWalking: 0
   isRunning: 0
+  runTime: 0
   isJumpRunning: 0
   wasJumpRunning: 0
   isFallRunning: 0
