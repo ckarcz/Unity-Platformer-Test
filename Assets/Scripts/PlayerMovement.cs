@@ -5,9 +5,9 @@ public class PlayerMovement : MonoBehaviour
 {
     #region Component Variables 
 
-    private Rigidbody2D rigidBody;
-    private BoxCollider2D boxCollider;
-    private Animator animator;
+    private Rigidbody2D playerRigidBody;
+    private Collider2D playerCollider;
+    private Animator playerAnimator;
 
     #endregion Component Variables
 
@@ -15,11 +15,10 @@ public class PlayerMovement : MonoBehaviour
 
     [Header("World")]
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask wallLayer;
 
     [Header("Character")]
-    [SerializeField] private bool spriteFacesRight;
+    [SerializeField] private bool spriteFacesRight = true;
 
     [Header("Movement")]
     [SerializeField, Range(0, 20)] private float walkingVelocity = 5;
@@ -28,7 +27,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private bool allowFallRunning = true;
     [SerializeField] private bool mustJumpRunToFallRun = true;
     [SerializeField] private bool allowCrouchSliding = true;
-    [SerializeField, Range(0, 5)] private float minRunTimeForSlide = 1f;
+    [SerializeField, Range(0, 5)] private float minRunTimeForSlide = 0.5f;
 
     [Header("Jumping")]
     [SerializeField, Range(0, 20)] private float walkingJumpVelocity = 10;
@@ -101,9 +100,9 @@ public class PlayerMovement : MonoBehaviour
 
     private void Awake()
     {
-        rigidBody = GetComponent<Rigidbody2D>();
-        boxCollider = GetComponent<BoxCollider2D>();
-        animator = GetComponent<Animator>();
+        playerRigidBody = GetComponent<Rigidbody2D>();
+        playerCollider = GetComponent<BoxCollider2D>();
+        playerAnimator = GetComponent<Animator>();
 
         isFacingRight = spriteFacesRight;
         isFacingLeft = !isFacingRight;
@@ -153,38 +152,40 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isWallGrabbing)
         {
-            rigidBody.gravityScale = gravityWallGrabbing;
+            playerRigidBody.gravityScale = gravityWallGrabbing;
         }
         else if (isJumping)
         {
-            rigidBody.gravityScale = gravityJumping;
+            playerRigidBody.gravityScale = gravityJumping;
         }
         else if (isFalling)
         {
-            rigidBody.gravityScale = gravityFalling;
+            playerRigidBody.gravityScale = gravityFalling;
         }
         else
         {
-            rigidBody.gravityScale = gravityNormal;
+            playerRigidBody.gravityScale = gravityNormal;
         }
     }
 
     private void UpdateState()
     {
-        isTouchingGround = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
-        isTouchingWall = Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, wallLayer)
-                         ||
-                         Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, groundLayer);
+        var groundCollisionDown = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
+        isTouchingGround = groundCollisionDown;
 
-        isMoving = Math.Abs(rigidBody.linearVelocityX) > 0.01f;
+        var wallCollisionSides = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, wallLayer);
+        var groundCollisionSides = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, groundLayer);
+        isTouchingWall = wallCollisionSides || groundCollisionSides;
+
+        isMoving = Math.Abs(playerRigidBody.linearVelocityX) > 0.01f;
         isWalking = isMoving && !isCrouching && Math.Abs(inputHorizontalValue) > 0.01f;
         isRunning = isWalking && !isCrouching && inputRunHeldDown;
 
         isCrouching = inputVerticalValue < 0;
         isCrouchSliding = allowCrouchSliding && isCrouching && isMoving && (isCrouchSliding || runTime >= minRunTimeForSlide);
 
-        isJumping = rigidBody.linearVelocityY > 0.01f;
-        isFalling = rigidBody.linearVelocityY < -0.01f;
+        isJumping = playerRigidBody.linearVelocityY > 0.01f;
+        isFalling = playerRigidBody.linearVelocityY < -0.01f;
 
         wasJumpRunning = wasJumpRunning || isJumpRunning;
         isJumpRunning = inputRunHeldDown && isJumping && isJumpRunning;
@@ -200,17 +201,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateAnimation()
     {
-        animator.SetBool("Grounded", isTouchingGround);
+        playerAnimator.SetBool("Grounded", isTouchingGround);
 
-        animator.SetBool("Crouching", isCrouching);
+        playerAnimator.SetBool("Crouching", isCrouching);
 
-        animator.SetBool("Walking", isTouchingGround && !isJumping && !isFalling && isWalking);
-        animator.SetBool("Running", isTouchingGround && !isJumping && !isFalling && isRunning);
+        playerAnimator.SetBool("Walking", isTouchingGround && !isJumping && !isFalling && isWalking);
+        playerAnimator.SetBool("Running", isTouchingGround && !isJumping && !isFalling && isRunning);
 
-        animator.SetBool("Jumping", isJumping);
-        animator.SetBool("Falling", isFalling);
+        playerAnimator.SetBool("Jumping", isJumping);
+        playerAnimator.SetBool("Falling", isFalling);
 
-        animator.SetBool("WallGrabbing", isWallGrabbing);
+        playerAnimator.SetBool("WallGrabbing", isWallGrabbing);
     }
 
     private void UpdateMovement()
@@ -232,23 +233,19 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isCrouching || isJumping)
         {
-            var isMovingIntoWall = isTouchingWall && ((isFacingRight && inputHorizontalRight) || (isFacingLeft && inputHorizontalLeft));
-            if (!isMovingIntoWall)
-            {
                 MoveHorizontally();
-            }
         }
 
         if (isCrouching && !isCrouchSliding)
         {
-            rigidBody.linearVelocity = new Vector2(0, rigidBody.linearVelocity.y);
+            playerRigidBody.linearVelocity = new Vector2(0, playerRigidBody.linearVelocity.y);
         }
     }
 
     private void MoveHorizontally()
     {
         var horizontalVelovity = inputRunHeldDown && (isTouchingGround || isJumpRunning || isFallRunning) ? runningVelocity : walkingVelocity;
-        rigidBody.linearVelocity = new Vector2(horizontalVelovity * (isCrouchSliding ? Math.Sign(rigidBody.linearVelocity.x) : inputHorizontalValue), rigidBody.linearVelocity.y);
+        playerRigidBody.linearVelocity = new Vector2(horizontalVelovity * (isCrouchSliding ? Math.Sign(playerRigidBody.linearVelocity.x) : inputHorizontalValue), playerRigidBody.linearVelocity.y);
     }
 
     private void UpdateMovementVertical()
@@ -274,7 +271,7 @@ public class PlayerMovement : MonoBehaviour
         if ((!inputJumpHeldDown && isJumping && jumpAirTime < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTime < maxJumpAirTime))
         {
             var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : walkingJumpVelocity;
-            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, verticalVelocity);
+            playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, verticalVelocity);
         }
 
         if (isJumping)
@@ -289,7 +286,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isFalling)
         {
-            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, Math.Clamp(rigidBody.linearVelocity.y, -maxFallingVelocity, 0));
+            playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, Math.Clamp(playerRigidBody.linearVelocity.y, -maxFallingVelocity, 0));
 
             if (inputRunHeldDown && allowFallRunning)
             {
@@ -301,7 +298,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isWallGrabbing)
         {
-            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, Math.Clamp(rigidBody.linearVelocity.y, -maxWallGrabbingFallingVelocity, 0));
+            playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, Math.Clamp(playerRigidBody.linearVelocity.y, -maxWallGrabbingFallingVelocity, 0));
         }
 
         wasJumpRunning = isJumpRunning;

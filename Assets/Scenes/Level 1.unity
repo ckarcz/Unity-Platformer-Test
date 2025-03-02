@@ -1189,17 +1189,17 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  groundCheck: {fileID: 0}
   wallLayer:
     serializedVersion: 2
     m_Bits: 128
+  spriteFacesRight: 1
   walkingVelocity: 5
   runningVelocity: 10
   allowJumpRunning: 1
   allowFallRunning: 0
   mustJumpRunToFallRun: 1
   allowCrouchSliding: 1
-  minRunTimeForSlide: 1
+  minRunTimeForSlide: 0.5
   walkingJumpVelocity: 10
   runningJumpVelocity: 10
   minJumpAirTime: 0.1
