@@ -18,6 +18,9 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask wallLayer;
 
+    [Header("Character")]
+    [SerializeField] private bool spriteFacesRight;
+
     [Header("Movement")]
     [SerializeField, Range(0, 20)] private float walkingVelocity = 5;
     [SerializeField, Range(0, 20)] private float runningVelocity = 10;
@@ -101,6 +104,9 @@ public class PlayerMovement : MonoBehaviour
         rigidBody = GetComponent<Rigidbody2D>();
         boxCollider = GetComponent<BoxCollider2D>();
         animator = GetComponent<Animator>();
+
+        isFacingRight = spriteFacesRight;
+        isFacingLeft = !isFacingRight;
     }
 
     private void Start()
@@ -303,14 +309,24 @@ public class PlayerMovement : MonoBehaviour
 
     private void FaceRight()
     {
-        transform.localScale = new Vector3(1, 1, 1);
-        isFacingLeft = !(isFacingRight = true);
+        if (!isFacingRight)
+        {
+            transform.Rotate(Vector3.up, 180);
+
+            isFacingRight = true;
+            isFacingLeft = false;
+        }
     }
 
     private void FaceLeft()
     {
-        transform.localScale = new Vector3(-1, 1, 1);
-        isFacingLeft = !(isFacingRight = false);
+        if (!isFacingLeft)
+        {
+            transform.Rotate(Vector3.up, 180);
+
+            isFacingRight = false;
+            isFacingLeft = true;
+        }
     }
 
     #endregion Helper Methods
