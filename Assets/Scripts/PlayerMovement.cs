@@ -28,10 +28,11 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0, 5)] private float minRunTimeForSlide = 1f;
 
     [Header("Jumping")]
-    [SerializeField, Range(0, 20)] private float jumpVelocity = 10;
-    [SerializeField, Range(0, 20)] private float runningJumpVelocity = 12;
+    [SerializeField, Range(0, 20)] private float walkingJumpVelocity = 10;
+    [SerializeField, Range(0, 20)] private float runningJumpVelocity = 10;
     [SerializeField, Range(0, 2)] private float minJumpAirTime = 0.1f;
-    [SerializeField, Range(0, 2)] private float maxJumpAirTime = 0.3f;
+    [SerializeField, Range(0, 2)] private float walkingMaxJumpAirTime = 0.3f;
+    [SerializeField, Range(0, 2)] private float runningMaxJumpAirTime = 0.4f;
     [SerializeField, Range(0, 20)] private float maxFallingVelocity = 12;
     [SerializeField] private uint extraJumps = 0;
 
@@ -144,20 +145,17 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateGravity()
     {
-        if (isJumping)
+        if (isWallGrabbing)
+        {
+            rigidBody.gravityScale = gravityWallGrabbing;
+        }
+        else if (isJumping)
         {
             rigidBody.gravityScale = gravityJumping;
         }
         else if (isFalling)
         {
-            if (isWallGrabbing)
-            {
-                rigidBody.gravityScale = gravityWallGrabbing;
-            }
-            else
-            {
-                rigidBody.gravityScale = gravityFalling;
-            }
+            rigidBody.gravityScale = gravityFalling;
         }
         else
         {
@@ -186,7 +184,7 @@ public class PlayerMovement : MonoBehaviour
         isJumpRunning = inputRunHeldDown && isJumping && isJumpRunning;
         isFallRunning = inputRunHeldDown && isFalling && isFallRunning;
 
-        isWallGrabbing = allowWallGrabbing && !isTouchingGround && isTouchingWall && isFalling;
+        isWallGrabbing = allowWallGrabbing && !isTouchingGround && isTouchingWall;
         isWallGrabbingLeft = isWallGrabbing && isFacingLeft;
         isWallGrabbingRight = isWallGrabbing && isFacingRight;
 
@@ -266,9 +264,10 @@ public class PlayerMovement : MonoBehaviour
             jumpAirTime = 0;
         }
 
+        var maxJumpAirTime = isRunning ? runningMaxJumpAirTime : walkingMaxJumpAirTime;
         if ((!inputJumpHeldDown && isJumping && jumpAirTime < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTime < maxJumpAirTime))
         {
-            var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : jumpVelocity;
+            var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : walkingJumpVelocity;
             rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, verticalVelocity);
         }
 
@@ -284,8 +283,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isFalling)
         {
-            var verticalVelocity = isWallGrabbing ? maxWallGrabbingFallingVelocity : maxFallingVelocity;
-            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, Math.Clamp(rigidBody.linearVelocity.y, -verticalVelocity, 0));
+            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, Math.Clamp(rigidBody.linearVelocity.y, -maxFallingVelocity, 0));
 
             if (inputRunHeldDown && allowFallRunning)
             {
@@ -293,6 +291,11 @@ public class PlayerMovement : MonoBehaviour
             }
 
             isJumpRunning = false;
+        }
+
+        if (isWallGrabbing)
+        {
+            rigidBody.linearVelocity = new Vector2(rigidBody.linearVelocity.x, Math.Clamp(rigidBody.linearVelocity.y, -maxWallGrabbingFallingVelocity, 0));
         }
 
         wasJumpRunning = isJumpRunning;
