@@ -21,12 +21,11 @@ public class PlayerMovement : MonoBehaviour
     [Header("Movement")]
     [SerializeField, Range(0, 20)] private float walkingVelocity = 5;
     [SerializeField, Range(0, 20)] private float runningVelocity = 10;
-    [SerializeField] private bool allowCrouchSliding = true;
-    [SerializeField, Range(0, 10)] private float minRunTimeForSlide = 1f;
     [SerializeField] private bool allowJumpRunning = true;
     [SerializeField] private bool allowFallRunning = true;
     [SerializeField] private bool mustJumpRunToFallRun = true;
-
+    [SerializeField] private bool allowCrouchSliding = true;
+    [SerializeField, Range(0, 2)] private float minRunTimeForSlide = 0.1f;
 
     [Header("Jumping")]
     [SerializeField, Range(0, 20)] private float jumpVelocity = 10;
@@ -70,8 +69,6 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool isFacingLeft;
     [HideInInspector] public bool isFacingRight;
 
-    [HideInInspector] public bool isCrouching;
-
     [HideInInspector] public bool isMoving;
     [HideInInspector] public bool isWalking;
     [HideInInspector] public bool isRunning;
@@ -79,6 +76,9 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool isJumpRunning;
     [HideInInspector] public bool wasJumpRunning;
     [HideInInspector] public bool isFallRunning;
+
+    [HideInInspector] public bool isCrouching;
+    [HideInInspector] public bool isCrouchSliding;
 
     [HideInInspector] public bool isDashing;
 
@@ -172,12 +172,12 @@ public class PlayerMovement : MonoBehaviour
                          ||
                          Physics2D.BoxCast(boxCollider.bounds.center, boxCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, groundLayer);
 
-        isCrouching = inputVerticalValue < 0;
-
         isMoving = Math.Abs(rigidBody.linearVelocityX) > 0.01f;
-        isWalking = isMoving && Math.Abs(inputHorizontalValue) > 0.01f;
-        isRunning = isWalking && inputRunHeldDown;
-        runTime = isRunning ? runTime + Time.deltaTime : 0;
+        isWalking = isMoving && !isCrouching && Math.Abs(inputHorizontalValue) > 0.01f;
+        isRunning = isWalking && !isCrouching && inputRunHeldDown;
+
+        isCrouching = inputVerticalValue < 0;
+        isCrouchSliding = allowCrouchSliding && isCrouching && isMoving && (isCrouchSliding || runTime >= minRunTimeForSlide);
 
         isJumping = rigidBody.linearVelocityY > 0.01f;
         isFalling = rigidBody.linearVelocityY < -0.01f;
@@ -189,6 +189,9 @@ public class PlayerMovement : MonoBehaviour
         isWallGrabbing = allowWallGrabbing && !isTouchingGround && isTouchingWall && isFalling;
         isWallGrabbingLeft = isWallGrabbing && isFacingLeft;
         isWallGrabbingRight = isWallGrabbing && isFacingRight;
+
+        runTime = isRunning ? runTime + Time.deltaTime : 0;
+        jumpAirTime = isJumping ? jumpAirTime + Time.deltaTime : 0;
     }
 
     private void UpdateAnimation()
@@ -232,7 +235,7 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
-        if (isCrouching && (!allowCrouchSliding || (runTime < minRunTimeForSlide)))
+        if (isCrouching && !isCrouchSliding)
         {
             rigidBody.linearVelocity = new Vector2(0, rigidBody.linearVelocity.y);
         }
@@ -241,7 +244,7 @@ public class PlayerMovement : MonoBehaviour
     private void MoveHorizontally()
     {
         var horizontalVelovity = inputRunHeldDown && (isTouchingGround || isJumpRunning || isFallRunning) ? runningVelocity : walkingVelocity;
-        rigidBody.linearVelocity = new Vector2(horizontalVelovity * inputHorizontalValue, rigidBody.linearVelocity.y);
+        rigidBody.linearVelocity = new Vector2(horizontalVelovity * (isCrouchSliding ? Math.Sign(rigidBody.linearVelocity.x) : inputHorizontalValue), rigidBody.linearVelocity.y);
     }
 
     private void UpdateMovementVertical()
@@ -271,8 +274,6 @@ public class PlayerMovement : MonoBehaviour
 
         if (isJumping)
         {
-            jumpAirTime += Time.deltaTime;
-
             if (inputJumpPressed && inputRunHeldDown && allowJumpRunning)
             {
                 isJumpRunning = true;
