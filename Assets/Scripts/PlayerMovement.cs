@@ -25,7 +25,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private bool allowFallRunning = true;
     [SerializeField] private bool mustJumpRunToFallRun = true;
     [SerializeField] private bool allowCrouchSliding = true;
-    [SerializeField, Range(0, 2)] private float minRunTimeForSlide = 0.1f;
+    [SerializeField, Range(0, 5)] private float minRunTimeForSlide = 0.1f;
 
     [Header("Jumping")]
     [SerializeField, Range(0, 20)] private float jumpVelocity = 10;
