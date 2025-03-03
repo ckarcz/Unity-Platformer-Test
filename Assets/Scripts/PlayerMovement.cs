@@ -261,7 +261,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateMovementVertical()
     {
-        if (isTouchingGround)
+        if (isTouchingGround && !isJumping && !isFalling)
         {
             isJumping = false;
             isFalling = false;
@@ -275,15 +275,13 @@ public class PlayerMovement : MonoBehaviour
             coyoteTimeCounter -= Time.deltaTime;
         }
 
-        if (inputJumpPressed && (isTouchingGround || coyoteTimeCounter > 0f || (jumpsTaken > 1 && jumpsTaken <= extraJumps)))
+        if (inputJumpPressed && (isTouchingGround || coyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps)))
         {
             isJumping = true;
             isFalling = false;
 
             jumpsTaken++;
             jumpAirTimeCounter = 0;
-
-            print("JUMP #" + jumpsTaken);
         }
 
         var maxJumpAirTime = isRunning ? runningMaxJumpAirTime : walkingMaxJumpAirTime;
