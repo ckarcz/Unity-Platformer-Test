@@ -96,8 +96,6 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool isFalling;
 
     [HideInInspector] public bool isWallGrabbing;
-    [HideInInspector] public bool isWallGrabbingLeft;
-    [HideInInspector] public bool isWallGrabbingRight;
 
     #endregion State Variables
 
@@ -199,9 +197,7 @@ public class PlayerMovement : MonoBehaviour
         isJumpRunning = inputRunHeldDown && isJumping && isJumpRunning;
         isFallRunning = inputRunHeldDown && isFalling && isFallRunning;
 
-        isWallGrabbing = allowWallGrabbing && !isFalling && isTouchingWall;
-        isWallGrabbingLeft = isWallGrabbing && isFacingLeft;
-        isWallGrabbingRight = isWallGrabbing && isFacingRight;
+        isWallGrabbing = allowWallGrabbing && isTouchingWall && isFalling;
 
         runTime = isRunning ? runTime + Time.deltaTime : 0;
         jumpAirTime = isJumping ? jumpAirTime + Time.deltaTime : 0;
