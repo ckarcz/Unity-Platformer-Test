@@ -37,6 +37,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0, 2)] private float runningMaxJumpAirTime = 0.4f;
     [SerializeField, Range(0, 20)] private float maxFallingVelocity = 12;
     [SerializeField] private uint extraJumps = 0;
+    [SerializeField, Range(0, 1)] private float coyoteTime = 0.2f;
 
     [Header("Wall Grabbing")]
     [SerializeField] private bool allowWallGrabbing = true;
@@ -84,16 +85,16 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool isJumpRunning;
     [HideInInspector] public bool wasJumpRunning;
     [HideInInspector] public bool isFallRunning;
-
     [HideInInspector] public bool isCrouching;
     [HideInInspector] public bool isCrouchSliding;
 
     [HideInInspector] public bool isDashing;
 
     [HideInInspector] public bool isJumping;
-    [HideInInspector] public uint jumpsTaken;
-    [HideInInspector] public float jumpAirTime;
     [HideInInspector] public bool isFalling;
+    [HideInInspector] public uint jumpsTaken;
+    [HideInInspector] public float jumpAirTimeCounter;
+    [HideInInspector] public float coyoteTimeCounter;
 
     [HideInInspector] public bool isWallGrabbing;
 
@@ -200,7 +201,7 @@ public class PlayerMovement : MonoBehaviour
         isWallGrabbing = allowWallGrabbing && isTouchingWall && isFalling;
 
         runTime = isRunning ? runTime + Time.deltaTime : 0;
-        jumpAirTime = isJumping ? jumpAirTime + Time.deltaTime : 0;
+        jumpAirTimeCounter = isJumping ? jumpAirTimeCounter + Time.deltaTime : 0;
     }
 
     private void UpdateAnimation()
@@ -266,19 +267,25 @@ public class PlayerMovement : MonoBehaviour
             isFalling = false;
 
             jumpsTaken = 0;
+
+            coyoteTimeCounter = coyoteTime;
+        }
+        else
+        {
+            coyoteTimeCounter -= Time.deltaTime;
         }
 
-        if (inputJumpPressed && (isTouchingGround || jumpsTaken < extraJumps))
+        if (inputJumpPressed && (coyoteTimeCounter > 0f || jumpsTaken < extraJumps))
         {
             isJumping = true;
             isFalling = false;
 
             jumpsTaken++;
-            jumpAirTime = 0;
+            jumpAirTimeCounter = 0;
         }
 
         var maxJumpAirTime = isRunning ? runningMaxJumpAirTime : walkingMaxJumpAirTime;
-        if ((!inputJumpHeldDown && isJumping && jumpAirTime < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTime < maxJumpAirTime))
+        if ((!inputJumpHeldDown && isJumping && jumpAirTimeCounter < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTimeCounter < maxJumpAirTime))
         {
             var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : walkingJumpVelocity;
             playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, verticalVelocity);
@@ -336,6 +343,11 @@ public class PlayerMovement : MonoBehaviour
             isFacingRight = false;
             isFacingLeft = true;
         }
+    }
+
+    void OnDrawGizmos()
+    {
+        //Gizmos.DrawLine(new Vector2(peakJump.x - playerCollider.bounds.extents.x, peakJump.y), new Vector2(peakJump.x + playerCollider.bounds.extents.x, peakJump.y));
     }
 
     #endregion Helper Methods
