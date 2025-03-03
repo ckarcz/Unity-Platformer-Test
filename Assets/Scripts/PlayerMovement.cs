@@ -67,6 +67,9 @@ public class PlayerMovement : MonoBehaviour
     #region State Variables
 
     [HideInInspector] public bool isTouchingGround;
+    [HideInInspector] public bool isTouchingGroundSide;
+    [HideInInspector] public bool isTouchingGroundSideLeft;
+    [HideInInspector] public bool isTouchingGroundSideRight;
     [HideInInspector] public bool isTouchingWall;
     [HideInInspector] public bool isTouchingWallLeft;
     [HideInInspector] public bool isTouchingWallRight;
@@ -173,9 +176,12 @@ public class PlayerMovement : MonoBehaviour
     private void UpdateState()
     {
         isTouchingGround = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
-        isTouchingWall = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, wallLayer)
-                         ||
-                         Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, groundLayer);
+
+        isTouchingGroundSide = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, groundLayer);
+        isTouchingGroundSideLeft = isTouchingGroundSide && isFacingLeft;
+        isTouchingGroundSideRight = isTouchingGroundSide && isFacingRight;
+
+        isTouchingWall = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, wallLayer);
         isTouchingWallLeft = isTouchingWall && isFacingLeft;
         isTouchingWallRight = isTouchingWall && isFacingRight;
 
@@ -228,7 +234,8 @@ public class PlayerMovement : MonoBehaviour
         if (!isCrouching || isJumping)
         {
             var isMovingIntoWall = (isTouchingWallLeft && inputHorizontalLeft) || (isTouchingWallRight && inputHorizontalRight);
-            if (!isMovingIntoWall)
+            var isMovingIntoGroundSide = (isTouchingGroundSideLeft && inputHorizontalLeft) || (isTouchingGroundSideRight && inputHorizontalRight);
+            if (!isMovingIntoWall && !isMovingIntoGroundSide)
             {
                 MoveHorizontally();
             }
