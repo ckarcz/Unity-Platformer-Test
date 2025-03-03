@@ -1,4 +1,5 @@
 using System;
+using UnityEditor.MPE;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
@@ -38,6 +39,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0, 20)] private float maxFallingVelocity = 12;
     [SerializeField] private uint extraJumps = 0;
     [SerializeField, Range(0, 1)] private float coyoteTime = 0.2f;
+    [SerializeField, Range(0, 1)] private float jumpBufferTime = 0.2f;
 
     [Header("Wall Grabbing")]
     [SerializeField] private bool allowWallGrabbing = true;
@@ -95,6 +97,7 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public uint jumpsTaken;
     [HideInInspector] public float jumpAirTimeCounter;
     [HideInInspector] public float coyoteTimeCounter;
+    [HideInInspector] public float jumpBufferTimeCounter;
 
     [HideInInspector] public bool isWallGrabbing;
 
@@ -273,15 +276,22 @@ public class PlayerMovement : MonoBehaviour
         else
         {
             coyoteTimeCounter -= Time.deltaTime;
+            jumpBufferTimeCounter -= Time.deltaTime;
         }
 
-        if (inputJumpPressed && (isTouchingGround || coyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps)))
+        if ((inputJumpPressed && (isTouchingGround || coyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps))) || (isTouchingGround && jumpBufferTimeCounter > 0f ))
         {
             isJumping = true;
             isFalling = false;
 
             jumpsTaken++;
+
             jumpAirTimeCounter = 0;
+            jumpBufferTimeCounter = 0;
+        }
+        else if (inputJumpPressed && isFalling && jumpsTaken == 0)
+        {
+            jumpBufferTimeCounter = jumpBufferTime;
         }
 
         var maxJumpAirTime = isRunning ? runningMaxJumpAirTime : walkingMaxJumpAirTime;
