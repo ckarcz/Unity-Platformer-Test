@@ -26,7 +26,9 @@ public static class BoxCastDrawer
         Vector2 size,
         float angle,
         Vector2 direction,
-        float distance = Mathf.Infinity)
+        float distance = Mathf.Infinity,
+        Color? colorNormal = default,
+        Color? colorHit = default)
     {
         // Set up points to draw the cast.
         Vector2[] originalBox = CreateOriginalBox(origin, size, angle);
@@ -35,7 +37,7 @@ public static class BoxCastDrawer
         Vector2[] shiftedBox = CreateShiftedBox(originalBox, distanceVector);
 
         // Draw the cast.
-        Color castColor = hitInfo ? Color.red : Color.yellow;
+        Color castColor = hitInfo ? colorHit ?? Color.red : colorNormal ?? Color.yellow;
         //DrawBox(originalBox, castColor);
         DrawBox(shiftedBox, castColor);
         //ConnectBoxes(originalBox, shiftedBox, Color.gray);
@@ -68,10 +70,18 @@ public static class BoxCastDrawer
         float distance = Mathf.Infinity,
         int layerMask = Physics2D.AllLayers,
         float minDepth = -Mathf.Infinity,
-        float maxDepth = Mathf.Infinity)
+        float maxDepth = Mathf.Infinity,
+        bool draw = true,
+        Color? colorNormal = default,
+        Color? colorHit = default)
     {
         var hitInfo = Physics2D.BoxCast(origin, size, angle, direction, distance, layerMask, minDepth, maxDepth);
-        Draw(hitInfo, origin, size, angle, direction, distance);
+
+        if (draw)
+        {
+            Draw(hitInfo, origin, size, angle, direction, distance, colorNormal, colorHit);
+        }
+        
         return hitInfo;
     }
 

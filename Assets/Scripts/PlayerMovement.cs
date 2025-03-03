@@ -173,13 +173,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateState()
     {
-        isTouchingGround = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
+        isTouchingGround = BoxCastDrawer.BoxCastAndDraw(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer, colorNormal: Color.cyan, colorHit: Color.magenta, draw: true);
 
-        isTouchingGroundSide = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, groundLayer);
+        isTouchingGroundSide = BoxCastDrawer.BoxCastAndDraw(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, groundLayer, colorNormal: Color.yellow, colorHit: Color.red, draw: false);
         isTouchingGroundSideLeft = isTouchingGroundSide && isFacingLeft;
         isTouchingGroundSideRight = isTouchingGroundSide && isFacingRight;
 
-        isTouchingWall = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, wallLayer);
+        isTouchingWall = BoxCastDrawer.BoxCastAndDraw(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, wallLayer, colorNormal: Color.yellow, colorHit: Color.red, draw: true);
         isTouchingWallLeft = isTouchingWall && isFacingLeft;
         isTouchingWallRight = isTouchingWall && isFacingRight;
 
