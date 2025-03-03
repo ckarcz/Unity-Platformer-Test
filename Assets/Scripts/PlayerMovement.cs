@@ -38,7 +38,7 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0, 2)] private float runningMaxJumpAirTime = 0.4f;
     [SerializeField, Range(0, 20)] private float maxFallingVelocity = 12;
     [SerializeField] private uint extraJumps = 0;
-    [SerializeField, Range(0, 1)] private float coyoteTime = 0.1f;
+    [SerializeField, Range(0, 1)] private float jumpCoyoteTime = 0.1f;
     [SerializeField, Range(0, 1)] private float jumpBufferTime = 0.1f;
 
     [Header("Wall Grabbing")]
@@ -96,7 +96,7 @@ public class PlayerMovement : MonoBehaviour
     [HideInInspector] public bool isFalling;
     [HideInInspector] public uint jumpsTaken;
     [HideInInspector] public float jumpAirTimeCounter;
-    [HideInInspector] public float coyoteTimeCounter;
+    [HideInInspector] public float jumpCoyoteTimeCounter;
     [HideInInspector] public float jumpBufferTimeCounter;
 
     [HideInInspector] public bool isWallGrabbing;
@@ -271,15 +271,15 @@ public class PlayerMovement : MonoBehaviour
 
             jumpsTaken = 0;
 
-            coyoteTimeCounter = coyoteTime;
+            jumpCoyoteTimeCounter = jumpCoyoteTime;
         }
         else
         {
-            coyoteTimeCounter -= Time.deltaTime;
+            jumpCoyoteTimeCounter -= Time.deltaTime;
             jumpBufferTimeCounter -= Time.deltaTime;
         }
 
-        if ((inputJumpPressed && (isTouchingGround || coyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps))) || (isTouchingGround && jumpBufferTimeCounter > 0f ))
+        if ((inputJumpPressed && (isTouchingGround || jumpCoyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps))) || (isTouchingGround && jumpBufferTimeCounter > 0f ))
         {
             isJumping = true;
             isFalling = false;
