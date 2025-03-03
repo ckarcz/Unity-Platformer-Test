@@ -289,7 +289,7 @@ public class PlayerMovement : MonoBehaviour
             jumpAirTimeCounter = 0;
             jumpBufferTimeCounter = 0;
         }
-        else if (inputJumpPressed && isFalling && jumpsTaken == 0)
+        else if (inputJumpPressed && isFalling)
         {
             jumpBufferTimeCounter = jumpBufferTime;
         }
