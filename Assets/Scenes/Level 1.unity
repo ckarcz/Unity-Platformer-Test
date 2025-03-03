@@ -1685,8 +1685,8 @@ MonoBehaviour:
   runningMaxJumpAirTime: 0.4
   maxFallingVelocity: 12
   extraJumps: 0
-  coyoteTime: 0.1
-  jumpBufferTime: 0.1
+  jumpCoyoteTime: 0.05
+  jumpBufferTime: 0.05
   allowWallGrabbing: 1
   maxWallGrabbingFallingVelocity: 1
   gravityNormal: 4
@@ -1716,7 +1716,7 @@ MonoBehaviour:
   isFalling: 0
   jumpsTaken: 0
   jumpAirTimeCounter: 0
-  coyoteTimeCounter: 0
+  jumpCoyoteTimeCounter: 0
   jumpBufferTimeCounter: 0
   isWallGrabbing: 0
 --- !u!95 &2090968876
