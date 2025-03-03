@@ -68,6 +68,8 @@ public class PlayerMovement : MonoBehaviour
 
     [HideInInspector] public bool isTouchingGround;
     [HideInInspector] public bool isTouchingWall;
+    [HideInInspector] public bool isTouchingWallLeft;
+    [HideInInspector] public bool isTouchingWallRight;
 
     [HideInInspector] public bool isFacingLeft;
     [HideInInspector] public bool isFacingRight;
@@ -170,12 +172,12 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateState()
     {
-        var groundCollisionDown = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
-        isTouchingGround = groundCollisionDown;
-
+        isTouchingGround = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
         isTouchingWall = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, wallLayer)
                          ||
                          Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, groundLayer);
+        isTouchingWallLeft = isTouchingWall && isFacingLeft;
+        isTouchingWallRight = isTouchingWall && isFacingRight;
 
         isMoving = Math.Abs(playerRigidBody.linearVelocityX) > 0.01f;
         isWalking = isMoving && !isCrouching && Math.Abs(inputHorizontalValue) > 0.01f;
@@ -225,7 +227,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (!isCrouching || isJumping)
         {
-            var isMovingIntoWall = isTouchingWall && ((isFacingRight && inputHorizontalRight) || (isFacingLeft && inputHorizontalLeft));
+            var isMovingIntoWall = (isTouchingWallLeft && inputHorizontalLeft) || (isTouchingWallRight && inputHorizontalRight);
             if (!isMovingIntoWall)
             {
                 MoveHorizontally();
