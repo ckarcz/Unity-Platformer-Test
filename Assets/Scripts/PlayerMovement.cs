@@ -268,14 +268,14 @@ public class PlayerMovement : MonoBehaviour
 
             jumpsTaken = 0;
 
-            coyoteTimeCounter = coyoteTime;
+            coyoteTimeCounter = 0;
         }
         else
         {
-            coyoteTimeCounter -= Time.deltaTime;
+            coyoteTimeCounter += Time.deltaTime;
         }
 
-        if (inputJumpPressed && (coyoteTimeCounter > 0f || jumpsTaken < extraJumps))
+        if (inputJumpPressed && (coyoteTimeCounter <= coyoteTime || jumpsTaken < extraJumps))
         {
             isJumping = true;
             isFalling = false;
