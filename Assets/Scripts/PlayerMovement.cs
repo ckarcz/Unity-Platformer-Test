@@ -38,8 +38,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField, Range(0, 2)] private float runningMaxJumpAirTime = 0.4f;
     [SerializeField, Range(0, 20)] private float maxFallingVelocity = 12;
     [SerializeField] private uint extraJumps = 0;
-    [SerializeField, Range(0, 1)] private float coyoteTime = 0.2f;
-    [SerializeField, Range(0, 1)] private float jumpBufferTime = 0.2f;
+    [SerializeField, Range(0, 1)] private float coyoteTime = 0.1f;
+    [SerializeField, Range(0, 1)] private float jumpBufferTime = 0.1f;
 
     [Header("Wall Grabbing")]
     [SerializeField] private bool allowWallGrabbing = true;

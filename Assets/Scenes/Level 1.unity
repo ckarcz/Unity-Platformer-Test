@@ -1685,6 +1685,8 @@ MonoBehaviour:
   runningMaxJumpAirTime: 0.4
   maxFallingVelocity: 12
   extraJumps: 0
+  coyoteTime: 0.1
+  jumpBufferTime: 0.1
   allowWallGrabbing: 1
   maxWallGrabbingFallingVelocity: 1
   gravityNormal: 4
@@ -1711,9 +1713,11 @@ MonoBehaviour:
   isCrouchSliding: 0
   isDashing: 0
   isJumping: 1
-  jumpsTaken: 0
-  jumpAirTime: 0
   isFalling: 0
+  jumpsTaken: 0
+  jumpAirTimeCounter: 0
+  coyoteTimeCounter: 0
+  jumpBufferTimeCounter: 0
   isWallGrabbing: 0
 --- !u!95 &2090968876
 Animator:
