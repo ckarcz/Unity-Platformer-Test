@@ -173,9 +173,9 @@ public class PlayerMovement : MonoBehaviour
         var groundCollisionDown = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, Vector2.down, 0.1f, groundLayer);
         isTouchingGround = groundCollisionDown;
 
-        var wallCollisionSides = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, wallLayer);
-        var groundCollisionSides = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, new Vector2(transform.localScale.x, 0), 0.1f, groundLayer);
-        isTouchingWall = wallCollisionSides || groundCollisionSides;
+        isTouchingWall = Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, wallLayer)
+                         ||
+                         Physics2D.BoxCast(playerCollider.bounds.center, playerCollider.bounds.size, 0, isFacingRight ? Vector2.right : Vector2.left, 0.1f, groundLayer);
 
         isMoving = Math.Abs(playerRigidBody.linearVelocityX) > 0.01f;
         isWalking = isMoving && !isCrouching && Math.Abs(inputHorizontalValue) > 0.01f;
@@ -222,6 +222,21 @@ public class PlayerMovement : MonoBehaviour
 
     private void UpdateMovementHorizontal()
     {
+
+        if (!isCrouching || isJumping)
+        {
+            var isMovingIntoWall = isTouchingWall && ((isFacingRight && inputHorizontalRight) || (isFacingLeft && inputHorizontalLeft));
+            if (!isMovingIntoWall)
+            {
+                MoveHorizontally();
+            }
+        }
+
+        if (isCrouching && !isCrouchSliding)
+        {
+            playerRigidBody.linearVelocity = new Vector2(0, playerRigidBody.linearVelocity.y);
+        }
+
         if (inputHorizontalRight)
         {
             FaceRight();
@@ -229,16 +244,6 @@ public class PlayerMovement : MonoBehaviour
         else if (inputHorizontalLeft)
         {
             FaceLeft();
-        }
-
-        if (!isCrouching || isJumping)
-        {
-                MoveHorizontally();
-        }
-
-        if (isCrouching && !isCrouchSliding)
-        {
-            playerRigidBody.linearVelocity = new Vector2(0, playerRigidBody.linearVelocity.y);
         }
     }
 
@@ -286,7 +291,14 @@ public class PlayerMovement : MonoBehaviour
 
         if (isFalling)
         {
-            playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, Math.Clamp(playerRigidBody.linearVelocity.y, -maxFallingVelocity, 0));
+            if (isWallGrabbing)
+            {
+                playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, Math.Clamp(playerRigidBody.linearVelocity.y, -maxWallGrabbingFallingVelocity, 0));
+            }
+            else
+            {
+                playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, Math.Clamp(playerRigidBody.linearVelocity.y, -maxFallingVelocity, 0));
+            }
 
             if (inputRunHeldDown && allowFallRunning)
             {
@@ -294,11 +306,6 @@ public class PlayerMovement : MonoBehaviour
             }
 
             isJumpRunning = false;
-        }
-
-        if (isWallGrabbing)
-        {
-            playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, Math.Clamp(playerRigidBody.linearVelocity.y, -maxWallGrabbingFallingVelocity, 0));
         }
 
         wasJumpRunning = isJumpRunning;
