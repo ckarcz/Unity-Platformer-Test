@@ -199,7 +199,7 @@ public class PlayerMovement : MonoBehaviour
         isJumpRunning = inputRunHeldDown && isJumping && isJumpRunning;
         isFallRunning = inputRunHeldDown && isFalling && isFallRunning;
 
-        isWallGrabbing = allowWallGrabbing && !isTouchingGround && isTouchingWall;
+        isWallGrabbing = allowWallGrabbing && !isFalling && isTouchingWall;
         isWallGrabbingLeft = isWallGrabbing && isFacingLeft;
         isWallGrabbingRight = isWallGrabbing && isFacingRight;
 
