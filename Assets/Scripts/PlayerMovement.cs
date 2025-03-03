@@ -268,26 +268,28 @@ public class PlayerMovement : MonoBehaviour
 
             jumpsTaken = 0;
 
-            coyoteTimeCounter = 0;
+            coyoteTimeCounter = coyoteTime;
         }
         else
         {
-            coyoteTimeCounter += Time.deltaTime;
+            coyoteTimeCounter -= Time.deltaTime;
         }
 
-        if (inputJumpPressed && (coyoteTimeCounter <= coyoteTime || jumpsTaken < extraJumps))
+        if (inputJumpPressed && (isTouchingGround || coyoteTimeCounter > 0f || (jumpsTaken > 1 && jumpsTaken <= extraJumps)))
         {
             isJumping = true;
             isFalling = false;
 
             jumpsTaken++;
             jumpAirTimeCounter = 0;
+
+            print("JUMP #" + jumpsTaken);
         }
 
         var maxJumpAirTime = isRunning ? runningMaxJumpAirTime : walkingMaxJumpAirTime;
         if ((!inputJumpHeldDown && isJumping && jumpAirTimeCounter < minJumpAirTime) || (inputJumpHeldDown && isJumping && jumpAirTimeCounter < maxJumpAirTime))
         {
-            var verticalVelocity = isRunning && jumpsTaken == 0 ? runningJumpVelocity : walkingJumpVelocity;
+            var verticalVelocity = isRunning && jumpsTaken == 1 ? runningJumpVelocity : walkingJumpVelocity;
             playerRigidBody.linearVelocity = new Vector2(playerRigidBody.linearVelocity.x, verticalVelocity);
         }
 
