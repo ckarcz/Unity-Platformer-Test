@@ -243,6 +243,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (isCrouching && !isCrouchSliding)
         {
+            // below prevents crouch jumping
             playerRigidBody.linearVelocity = new Vector2(0, playerRigidBody.linearVelocity.y);
         }
 
@@ -279,7 +280,7 @@ public class PlayerMovement : MonoBehaviour
             jumpBufferTimeCounter -= Time.deltaTime;
         }
 
-        if ((inputJumpPressed && (isTouchingGround || jumpCoyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps))) || (isTouchingGround && jumpBufferTimeCounter > 0f ))
+        if ((inputJumpPressed && (isTouchingGround || jumpCoyoteTimeCounter > 0f || (jumpsTaken >= 1 && jumpsTaken <= extraJumps))) || (isTouchingGround && jumpBufferTimeCounter > 0f))
         {
             isJumping = true;
             isFalling = false;
